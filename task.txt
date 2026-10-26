@@ -1,0 +1,61 @@
+Objektų vietų parinkimo uždavinys
+Geografinėje teritorijoje veikia kelios paslaugas gyventojams teikiančios įmonės, sumoje turinčios numPF objektų (Preexisting Facilities). Į rinką nori įeiti nauja įmonė, planuojanti atidaryti numX naujų objektų. Vietos naujiems objektams turi būti parenkamos iš numCL galimų vietovių (Candidate Locations) siekiant pritraukti kuo daugiau klientų (užimti kuo didesnę rinkos dalį).
+
+Faile demandPoints.dat pateikiama 10.000 Lietuvos gyvenviečių (Demand Points) duomenys: geografinės koordinatės ir populiacija. Rinkoje jau esantys numPF objektų išdėstyti didžiausiuose miestuose (po vieną mieste). Nauji objektai gali būti statomi numCL didžiausiuose miestuose. Naujas objektas gali būti statomas ir tame mieste kur jau yra kitos įmonės objektas, tačiau viename mieste gali būti tik vienas naujas objektas.
+
+Objektus klientai renkasi pagal geografinį atstumą − visi vieno miesto gyventojai renkasi artimiausią objektą. Todėl vertinant sprendinio kokybę kiekvienam miestui yra randamas artimiausias jau rinkoje esantis objektas ir artimiausias iš naujai planuojamų statyti objektų. Jei mažiausias atstumas iki naujos įmonės objekto yra mažesnis už atstumą iki artimiausio jau rinkoje esančio objekto, tai visa to miesto perkamoji galia atitenka naujajai įmonei. Lygiųjų atveju, naujoji įmonė gauna trečdalį miesto klientų.
+
+Optimalaus sprendinio ieškoma pilnojo perrinkimo (angl. Complete Enumeration) algoritmu: generuojamos visos galimo vietų naujiems objektams kombinacijos ir parenkama geriausia.
+
+Faile flpenum.cpp pateikiamas programos, kuri randa optimalias vietas naujiems objektams, kodas. Pagrindiniai parametrai (globalūs kintamieji):
+
+numDP: uždaviniui naudojamos duomenų aibės dydis (miestų skaičius, daugiausiai 10.000);
+numPF: rinkoje esančių objektų skaičius;
+numCL: galimų vietų naujiems objektams skaičius (pirmi taškai iš duomenų masyvo);
+numX: naujų objektų skaičius.
+Algoritmų vykdymo pradžioje sudaroma atstumų matrica, kurioje saugomi atstumai kilometrais tarp taškų, suskaičiuoti pagal Haversino formulę. Atsižvelgiant į tai, kad atstumas nuo taško A iki taško B yra lygus atstumui nuo taško B iki taško A, yra užpildoma tik pusė matricos. Šioje matricoje saugomi atstumai yra naudojami ieškant optimalių vietų naujiems objektams.
+
+Laboratorinis darbas #1
+Algoritmo analizė
+
+Parinkite duomenų aibės dydį (parametras numDP) tokį, kad atstumų matricos skaičiavimas užtruktų 3−5 sekundes, o galimų vietų skaičių (parametras numCL) tokį, kad sprendinio paieškos laikas butų 15−30 sekundžių. Naudokite uosis.mif.vu.lt skaičiavimų resursus.
+
+Duomenų įkėlimą ir atstumų matricos skaičiavimą laikydami nuosekliąja algoritmo dalimi, o sprendinio paiešką − lygiagretinama dalimi, įvertinkite teorinius galimus algoritmo pagreitėjimus naudojant 2 ir 4 procesorius, bei didžiausią galimą pagreitėjimą (remkitės Amdalo dėsniu).
+
+Bendros atminties lygiagrečiojo algoritmo sudarymas
+
+Duomenų įkėlimą ir atstumų matricos skaičiavimą laikydami nuosekliąja algoritmo dalimi, sudarykite lygiagretųjį bendros atminties algoritmą ir eksperimentiniu būdu ištirkite jo pagreitėjimą naudodami 2 ir 4 procesorius. Viename grafike pavaizduokite:
+
+tiesinį pagreitėjimą;
+eksperimentų būdu nustatytą lygiagretinamos algoritmo dalies pagreitėjimą;
+eksperimentų būdu nustatytą viso algoritmo pagreitėjimą.
+Sudarykite lygiagretų bendros atminties algoritmą atstumų matricos skaičiavimui ir eksperimentiniu būdu ištirkite jo pagreitėjimą naudodami 2 ir 4 procesorius. Viename grafike pavaizduokite
+
+tiesinį pagreitėjimą;
+eksperimentų būdu nustatytą atstumų matricos skaičiavimo pagreitėjimą;
+eksperimentų būdu nustatytą sprendinio paieškos pagreitėjimą;
+eksperimentų būdu nustatytą viso algoritmo (kai matricos skaičiavimas ir sprendinio paieška išlygiagretinti) pagreitėjimą.
+Laboratorinis darbas #2
+Paskirstytos atminties lygiagrečiojo algoritmo sudarymas
+
+Sudarytą bendros atminties lygiagretųjį algoritmą perdarykite į paskirstytos atminties algoritmą ir ištirkite jo pagreitėjimą naudodami 2, 4 ir 8 procesorius (naudokite uosis.mif.vu.lt skaičiavimų resursus). Ataskaitoje aprašykite kokiu būdu paskirstėte darbą skaičiavimo mazgams, kokiu būdu vyko komunikacija tarp jų.
+
+Viename grafike pavaizduokite tiesinį pagreitėjimą ir eksperimentų būdu nustatytą:
+
+atstumų matricos skaičiavimo pagreitėjimą;
+sprendinio skaičiavimo pagreitėjimą;
+viso algoritmo (kai matricos skaičiavimas ir sprendinio paieška išlygiagretinti) pagreitėjimą.
+Laboratorinis darbas #3
+Lygiagrečiojo algoritmo paleidimas našiųjų skaičiavimų sistemoje
+
+Sudarytą paskirstytos atminties lygiagretųjį algoritmą paleiskite (MIF superkompiuteryje) ir atlikite skaičiavimus naudodami 2, 4 ir 8 arba daugiau procesorių.
+
+Viename grafike pavaizduokite tiesinį pagreitėjimą ir eksperimentų būdu nustatytą atstumų matricos skaičiavimo pagreitėjimo, sprendinio skaičiavimo pagreitėjimo, bei viso algoritmo (kai matricos skaičiavimas ir sprendinio paieška išlygiagretinti) pagreitėjimo priklausomybes nuo procesorių skaičiaus.
+Atsiskaitymas
+Laboratorinio darbo #1 rezultatus pateikite laisva forma parengtoje ataskaitoje (vėliau šią ataskaitą papildykite kitų laboratorinių darbų rezultatų aprašymu).
+
+Ataskaitoje turi būti pateikti visų užduočių rezultatai. Jei užduotis reikalauja sudaryti/išlygiagretinti/modifikuoti algoritmą ar parinkti algoritmo parametrus − aprašykite kaip tai padarėte (naudojama strategija, sudaryto algoritmo aprašymas ar pseudokodas, parinktų parametrų reikšmės ir pan.). Ataskaitą arba atitinkamas jos dalis pateikite VMA iki nurodyto termino.
+
+Atsiskaitymas vyks žodžiu. Atsiskaitymo metu turėsite pristatyti ataskaitos dalį, aprašančią atsiskaitomą laboratorinį darbą, pakomentuoti gautus rezultatus, esant reikalui parodyti sudarytos programos kodą.
+
+Paskutinį kartą keista: antradienis, 2026 spalio 6, 16:01
