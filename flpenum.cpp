@@ -2,6 +2,8 @@
 #include <cmath>
 #include <time.h>
 #include <sys/time.h>
+#include <algorithm>
+#include <cstdlib>
 
 using namespace std;
 
@@ -27,15 +29,24 @@ double HaversineDistance(double lat1, double lon1, double lat2, double lon2);
 double HaversineDistance(int i, int j);
 double evaluateSolution(int* X);
 int increaseX(int* X, int index, int maxindex);
+void parallelSearch();
 
 //=============================================================================
 
-int main() {
-	loadDemandPoints();             // Duomenu nuskaitymas is failo	
+int main(int argc, char **argv) {
+	// Parametrai: flpenum [numDP] [numCL] [lygiagreti matrica 0/1]
+	bool parallelMatrix = false;
+	if (argc > 1) numDP = atoi(argv[1]);
+	if (argc > 2) numCL = atoi(argv[2]);
+	if (argc > 3) parallelMatrix = atoi(argv[3]) != 0;
+
+	loadDemandPoints();             // Duomenu nuskaitymas is failo
     double t_start = getTime();     // Algoritmo vykdymo pradzios laikas
 
     //----- Atstumu matricos skaiciavimas -------------------------------------
     distanceMatrix = new double*[numDP];
+	// Eiluciu ilgiai skirtingi (i+1), todel dinaminis paskirstymas
+	#pragma omp parallel for schedule(dynamic, 16) if(parallelMatrix)
 	for (int i=0; i<numDP; i++) {
 		distanceMatrix[i] = new double[i+1];
 		for (int j=0; j<=i; j++) {
@@ -45,23 +56,9 @@ int main() {
     double t_matrix = getTime();
     cout << "Matricos skaiciavimo trukme: " << t_matrix - t_start << endl;
 
-    //----- Pradines naujo ir geriausio sprendiniu reiksmes -------------------
-	for (int i=0; i<numX; i++) {    // Pradines naujo ir geriausio sprendiniu koordinates: [0,1,2,...]
-		X[i] = i;
-		bestX[i] = i;
-	}
-    u = evaluateSolution(X);        // Naujo sprendinio naudingumas (utility)
-    bestU = u;                      // Geriausio sprendinio sprendinio naudingumas
-		
-    //----- Visų galimų sprendinių perrinkimas --------------------------------
-	while (increaseX(X, numX-1, numCL) == true) {
-        u = evaluateSolution(X);
-        if (u > bestU) {
-            bestU = u;
-            for (int i=0; i<numX; i++) bestX[i] = X[i];
-        }
-	}
-	
+    //----- Visų galimų sprendinių perrinkimas (lygiagreciai) -----------------
+	parallelSearch();
+
     //----- Rezultatu spausdinimas --------------------------------------------
 	double t_finish = getTime();     // Skaiciavimu pabaigos laikas
 	cout << "Sprendinio paieskos trukme: " << t_finish - t_matrix << endl;
@@ -69,6 +66,48 @@ int main() {
     cout << "Geriausias sprendinys: ";
 	for (int i=0; i<numX; i++) cout << bestX[i] << " ";
 	cout << "(" << bestU << " procentai rinkos)" << endl;
+}
+
+//===== Lygiagreti sprendinio paieska (OpenMP) ================================
+// Visi sprendiniai suskirstomi i grupes pagal pirma elementa X[0]:
+// grupe "first" = visos kombinacijos [first, ...]. Kiekviena gija dinamiskai
+// pasiima grupes, jas perrenka su savo X kopija ir saugo savo geriausia sprendini.
+// Pabaigoje giju rezultatai sujungiami (lygiuju atveju laimi leksikografiskai
+// mazesnis sprendinys - taip pat kaip nuosekliame algoritme).
+
+void parallelSearch() {
+	bestU = -1;
+	#pragma omp parallel
+	{
+		int *localX = new int[numX];        // Gijos naujas sprendinys
+		int *localBestX = new int[numX];    // Gijos geriausias sprendinys
+		double localBestU = -1;
+
+		#pragma omp for schedule(dynamic)
+		for (int first=0; first<=numCL-numX; first++) {
+			for (int i=0; i<numX; i++) localX[i] = first+i;     // Pirma grupes kombinacija
+			do {
+				double localU = evaluateSolution(localX);
+				if (localU > localBestU ||
+				    (localU == localBestU && lexicographical_compare(localX, localX+numX, localBestX, localBestX+numX))) {
+					localBestU = localU;
+					for (int i=0; i<numX; i++) localBestX[i] = localX[i];
+				}
+			} while (increaseX(localX, numX-1, numCL) && localX[0] == first);
+		}
+
+		#pragma omp critical
+		{
+			if (localBestU > bestU ||
+			    (localBestU == bestU && lexicographical_compare(localBestX, localBestX+numX, bestX, bestX+numX))) {
+				bestU = localBestU;
+				for (int i=0; i<numX; i++) bestX[i] = localBestX[i];
+			}
+		}
+
+		delete[] localX;
+		delete[] localBestX;
+	}
 }
 
 //===== Funkciju implementacijos (siu funkciju LYGIAGRETINTI NEREIKIA) ========

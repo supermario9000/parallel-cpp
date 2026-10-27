@@ -1,0 +1,21 @@
+Distinct solutions across all runs: {'0 20 26 (27.3072 procentai rinkos)'}
+
+Sequential: matrix 3.877 s, search 25.475 s, total 29.352 s
+Parallel fraction P = 0.8679
+Amdahl S(2) = 1.767
+Amdahl S(4) = 2.865
+Amdahl S_max = 7.570
+
+=== matrix sequential (median of repeats) ===
+threads | matrix s | search s | total s | S_matrix | S_search | S_total | Amdahl
+      1 |    3.877 |   25.475 |  29.491 |    1.000 |    1.000 |   1.000 |  1.000
+      2 |    3.749 |   12.415 |  16.164 |    1.034 |    2.052 |   1.825 |  1.767
+      4 |    3.789 |    6.203 |  10.024 |    1.023 |    4.107 |   2.942 |  2.865
+
+=== matrix parallel (median of repeats) ===
+threads | matrix s | search s | total s | S_matrix | S_search | S_total | Amdahl
+      1 |    3.847 |   25.414 |  29.261 |    1.000 |    1.000 |   1.000 |  1.000
+      2 |    1.920 |   12.526 |  14.446 |    2.004 |    2.029 |   2.026 |  1.767
+      4 |    0.886 |    5.715 |   6.591 |    4.344 |    4.447 |   4.439 |  2.865
+saved uosis_chart1.png
+saved uosis_chart2.png
