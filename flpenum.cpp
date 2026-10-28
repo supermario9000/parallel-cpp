@@ -2,8 +2,8 @@
 #include <cmath>
 #include <time.h>
 #include <sys/time.h>
-#include <algorithm>
 #include <cstdlib>
+#include <omp.h>
 
 using namespace std;
 
@@ -34,19 +34,24 @@ void parallelSearch();
 //=============================================================================
 
 int main(int argc, char **argv) {
-	// Parametrai: flpenum [numDP] [numCL] [lygiagreti matrica 0/1]
+	// Parametrai: flpenum [numDP] [numCL] [lygiagreti matrica 0/1] [giju skaicius]
 	bool parallelMatrix = false;
+	int numThreads = 1;
 	if (argc > 1) numDP = atoi(argv[1]);
 	if (argc > 2) numCL = atoi(argv[2]);
 	if (argc > 3) parallelMatrix = atoi(argv[3]) != 0;
+	if (argc > 4) numThreads = atoi(argv[4]);
 
 	loadDemandPoints();             // Duomenu nuskaitymas is failo
     double t_start = getTime();     // Algoritmo vykdymo pradzios laikas
 
     //----- Atstumu matricos skaiciavimas -------------------------------------
     distanceMatrix = new double*[numDP];
+	// Jei matrica skaiciuojama nuosekliai - lygiagrecioje srityje tik 1 gija
+	if (parallelMatrix) omp_set_num_threads(numThreads);
+	else omp_set_num_threads(1);
 	// Eiluciu ilgiai skirtingi (i+1), todel dinaminis paskirstymas
-	#pragma omp parallel for schedule(dynamic, 16) if(parallelMatrix)
+	#pragma omp parallel for schedule(dynamic, 16)
 	for (int i=0; i<numDP; i++) {
 		distanceMatrix[i] = new double[i+1];
 		for (int j=0; j<=i; j++) {
@@ -57,6 +62,7 @@ int main(int argc, char **argv) {
     cout << "Matricos skaiciavimo trukme: " << t_matrix - t_start << endl;
 
     //----- Visų galimų sprendinių perrinkimas (lygiagreciai) -----------------
+	omp_set_num_threads(numThreads);
 	parallelSearch();
 
     //----- Rezultatu spausdinimas --------------------------------------------
@@ -72,8 +78,8 @@ int main(int argc, char **argv) {
 // Visi sprendiniai suskirstomi i grupes pagal pirma elementa X[0]:
 // grupe "first" = visos kombinacijos [first, ...]. Kiekviena gija dinamiskai
 // pasiima grupes, jas perrenka su savo X kopija ir saugo savo geriausia sprendini.
-// Pabaigoje giju rezultatai sujungiami (lygiuju atveju laimi leksikografiskai
-// mazesnis sprendinys - taip pat kaip nuosekliame algoritme).
+// Baigusi savo darba (nowait - nelaukia kitu giju), gija kritineje sekcijoje
+// palygina savo geriausia sprendini su bendru.
 
 void parallelSearch() {
 	bestU = -1;
@@ -83,13 +89,12 @@ void parallelSearch() {
 		int *localBestX = new int[numX];    // Gijos geriausias sprendinys
 		double localBestU = -1;
 
-		#pragma omp for schedule(dynamic)
+		#pragma omp for schedule(dynamic) nowait
 		for (int first=0; first<=numCL-numX; first++) {
 			for (int i=0; i<numX; i++) localX[i] = first+i;     // Pirma grupes kombinacija
 			do {
 				double localU = evaluateSolution(localX);
-				if (localU > localBestU ||
-				    (localU == localBestU && lexicographical_compare(localX, localX+numX, localBestX, localBestX+numX))) {
+				if (localU > localBestU) {
 					localBestU = localU;
 					for (int i=0; i<numX; i++) localBestX[i] = localX[i];
 				}
@@ -98,8 +103,7 @@ void parallelSearch() {
 
 		#pragma omp critical
 		{
-			if (localBestU > bestU ||
-			    (localBestU == bestU && lexicographical_compare(localBestX, localBestX+numX, bestX, bestX+numX))) {
+			if (localBestU > bestU) {
 				bestU = localBestU;
 				for (int i=0; i<numX; i++) bestX[i] = localBestX[i];
 			}

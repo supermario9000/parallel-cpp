@@ -1,4 +1,12 @@
-Matricos skaiciavimo trukme: 3.56249
-Sprendinio paieskos trukme: 25.982
-Algoritmo vykdymo trukme: 29.5445
+Matricos skaiciavimo trukme: 3.8795
+Sprendinio paieskos trukme: 27.2472
+Algoritmo vykdymo trukme: 31.1267
+Geriausias sprendinys: 0 20 26 (27.3072 procentai rinkos)
+Matricos skaiciavimo trukme: 3.85911
+Sprendinio paieskos trukme: 26.2665
+Algoritmo vykdymo trukme: 30.1256
+Geriausias sprendinys: 0 20 26 (27.3072 procentai rinkos)
+Matricos skaiciavimo trukme: 3.80747
+Sprendinio paieskos trukme: 27.1485
+Algoritmo vykdymo trukme: 30.956
 Geriausias sprendinys: 0 20 26 (27.3072 procentai rinkos)
